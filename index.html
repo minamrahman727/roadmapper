@@ -1,0 +1,945 @@
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <meta
+                name="description"
+                content="Explore transit routes – BRTS, people-bus, local bus and chinchi rides with detailed stop information."
+            />
+
+            <!-- Open Graph Tags for SEO -->
+            <meta property="og:title" content="ROUTEMAPPER" />
+            <meta property="og:description" content="Explore transit routes – BRTS, people-bus, local bus and chinchi rides with detailed stop information." />
+            <meta property="og:type" content="website" />
+            <meta property="og:url" content="https://routemapper.vercel.app" />
+            <!-- Replace the URL below with your image if available -->
+            <meta property="og:image" content="/routemapper.png" />
+
+            <!-- Twitter Card -->
+            <meta name="twitter:card" content="summary_large_image" />
+
+            <!-- Structured Data -->
+            <script type="application/ld+json">
+                {
+                    "@context": "http://schema.org",
+                    "@type": "WebPage",
+                    "name": "ROUTEMAPPER",
+                    "description": "Explore transit routes – BRTS, people-bus, local bus and chinchi rides with detailed stop information."
+                }
+            </script>
+
+            <title>ROUTEMAPPER</title>
+            <link rel="icon" type="image/png" href="/routemapper.png" />
+            <script
+                src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"
+                defer
+            ></script>
+            <style>
+                /* Color Variables */
+                :root {
+                    --primary-color: rgba(21, 101, 192, 0.494);
+                    --brts-color: rgba(67, 160, 72, 0.467);
+                    --people-bus-color: rgba(229, 56, 53, 0.468);
+                    --local-bus-color: rgba(253, 216, 53, 0.49);
+                    --chinchi-color: rgba(141, 36, 170, 0.489);
+                }
+
+                /* Global Styles */
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                }
+
+                body {
+                    background-color: #f5f5f5;
+                    line-height: 1.6;
+                }
+
+                /* Navigation Bar */
+                header.navbar {
+                    background-color: var(--primary-color);
+                    padding: 1rem;
+                    color: white;
+                    position: fixed;
+                    width: 100%;
+                    top: 0;
+                    z-index: 100;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                }
+
+                .navbar-content {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .logo {
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+                nav a {
+                    color: white;
+                    text-decoration: none;
+                    font-weight: 500;
+                    transition: color 0.3s;
+                }
+
+                nav a:hover {
+                    color: #bbdefb;
+                }
+
+                /* Hero Section */
+                .hero {
+                    background: linear-gradient(135deg, var(--primary-color), #303f9f);
+                    color: white;
+                    padding: 8rem 1rem 4rem;
+                    text-align: center;
+                    margin-top: 70px; /* account for fixed navbar */
+                }
+
+                .hero h1 {
+                    font-size: 2.5rem;
+                    margin-bottom: 1rem;
+                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                }
+
+                .hero p {
+                    font-size: 1.2rem;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    opacity: 0.9;
+                }
+
+                /* Search Section */
+                .search-container {
+                    max-width: 800px;
+                    margin: -2rem auto 2rem;
+                    padding: 0 1rem;
+                    position: relative;
+                    z-index: 1;
+                }
+
+                .search-container label {
+                    position: absolute;
+                    left: -9999px;
+                }
+
+                .search-box {
+                    width: 100%;
+                    padding: 1.2rem;
+                    border: none;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                    font-size: 1rem;
+                    transition: box-shadow 0.3s;
+                }
+
+                .search-box:focus {
+                    outline: none;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                }
+
+                /* Filters Section */
+                .filters-container {
+                    max-width: 1200px;
+                    margin: 2rem auto;
+                    padding: 0 1rem;
+                    display: flex;
+                    gap: 1rem;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                }
+
+                .filter-button {
+                    padding: 0.8rem 1.5rem;
+                    border: none;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    font-weight: 500;
+                    transition: all 0.3s;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    background-color: white;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                }
+
+                .filter-button.active {
+                    color: white;
+                    transform: scale(1.05);
+                }
+
+                .filter-button[data-type="all"] {
+                    color: var(--primary-color);
+                }
+                .filter-button[data-type="all"].active {
+                    background-color: var(--primary-color);
+                    color: white;
+                }
+                .filter-button[data-type="brts"] {
+                    color: var(--brts-color);
+                }
+                .filter-button[data-type="brts"].active {
+                    background-color: var(--brts-color);
+                    color: white;
+                }
+                .filter-button[data-type="people-bus"] {
+                    color: var(--people-bus-color);
+                }
+                .filter-button[data-type="people-bus"].active {
+                    background-color: var(--people-bus-color);
+                    color: white;
+                }
+                .filter-button[data-type="local-bus"] {
+                    color: var(--local-bus-color);
+                }
+                .filter-button[data-type="local-bus"].active {
+                    background-color: var(--local-bus-color);
+                    color: white;
+                }
+                .filter-button[data-type="chinchi"] {
+                    color: var(--chinchi-color);
+                }
+                .filter-button[data-type="chinchi"].active {
+                    background-color: var(--chinchi-color);
+                    color: white;
+                }
+
+                /* Routes Section */
+                .routes-container {
+                    max-width: 1200px;
+                    margin: 2rem auto;
+                    padding: 0 1rem;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    gap: 2rem;
+                }
+
+                /* Fade In Animation for route cards */
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .route-card {
+                    background-color: white;
+                    border-radius: 15px;
+                    padding: 1.5rem;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                    transition: all 0.3s;
+                    cursor: pointer;
+                    position: relative;
+                    overflow: hidden;
+                    animation: fadeIn 0.5s ease forwards;
+                }
+
+                .route-card::before {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 5px;
+                }
+
+                .route-card.brts::before {
+                    background-color: var(--brts-color);
+                }
+                
+                .route-card.people-bus::before {
+                    background-color: var(--people-bus-color);
+                }
+                
+                .route-card.local-bus::before {
+                    background-color: var(--local-bus-color);
+                }
+                
+                .route-card.chinchi::before {
+                    background-color: var(--chinchi-color);
+                }
+
+                .route-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+                }
+
+                .route-type {
+                    display: inline-block;
+                    padding: 0.5rem 1rem;
+                    border-radius: 20px;
+                    color: #000;
+                    margin-bottom: 1rem;
+                    font-size: 0.9rem;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+
+                .brts {
+                    background-color: var(--brts-color);
+                }
+                
+                .people-bus {
+                    background-color: var(--people-bus-color);
+                }
+                
+                .local-bus {
+                    background-color: var(--local-bus-color);
+                }
+                
+                .chinchi {
+                    background-color: var(--chinchi-color);
+                }
+
+                .route-details {
+                    margin-top: 1rem;
+                }
+
+                .route-details p {
+                    margin: 0.5rem 0;
+                    color: #666;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+                .route-number {
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    color: #333;
+                    margin: 0.5rem 0;
+                }
+
+                .fare-info {
+                    margin-top: 1rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid #eee;
+                    font-size: 0.9rem;
+                    color: #666;
+                }
+
+                /* Modal Styles */
+                .modal {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    z-index: 1000;
+                    backdrop-filter: blur(5px);
+                    animation: modalFadeIn 0.3s ease-out;
+                }
+
+                @keyframes modalFadeIn {
+                    from {
+                        opacity: 0;
+                    }
+                    to {
+                        opacity: 1;
+                    }
+                }
+
+                .modal-content {
+                    position: relative;
+                    background-color: #fff;
+                    margin: 5% auto;
+                    padding: 2rem;
+                    width: 90%;
+                    max-width: 800px;
+                    border-radius: 20px;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    animation: modalSlideIn 0.3s ease-out;
+                }
+
+                @keyframes modalSlideIn {
+                    from {
+                        transform: translateY(-50px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+
+                .close-modal {
+                    position: absolute;
+                    top: 1rem;
+                    right: 1rem;
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    color: #666;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background-color: #f5f5f5;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s;
+                }
+
+                .close-modal:hover {
+                    background-color: #eee;
+                    transform: rotate(90deg);
+                }
+
+                .stop-list {
+                    list-style: none;
+                    margin-top: 1.5rem;
+                }
+
+                .stop-item {
+                    padding: 1rem;
+                    border-bottom: 1px solid #eee;
+                    display: flex;
+                    align-items: center;
+                    transition: background-color 0.3s;
+                }
+
+                .stop-item:hover {
+                    background-color: #f8f9fa;
+                }
+
+                .stop-number {
+                    width: 30px;
+                    height: 30px;
+                    background-color: var(--primary-color);
+                    color: #fff;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 1rem;
+                    font-weight: bold;
+                }
+
+                .stop-info {
+                    flex-grow: 1;
+                }
+
+                .stop-name {
+                    font-weight: 500;
+                    color: #333;
+                }
+
+                .stop-details {
+                    font-size: 0.9rem;
+                    color: #666;
+                    margin-top: 0.25rem;
+                }
+
+                .modal-header {
+                    margin-bottom: 1.5rem;
+                    padding-bottom: 1rem;
+                    border-bottom: 2px solid #eee;
+                }
+
+                .modal-route-type {
+                    margin-bottom: 0.5rem;
+                }
+
+                .route-schedule {
+                    display: flex;
+                    justify-content: space-around;
+                    margin: 1rem 0;
+                    padding: 1rem;
+                    background-color: #f8f9fa;
+                    border-radius: 10px;
+                }
+
+                .schedule-item {
+                    text-align: center;
+                }
+
+                .schedule-label {
+                    font-size: 0.9rem;
+                    color: #666;
+                    margin-bottom: 0.5rem;
+                }
+
+                .schedule-value {
+                    font-weight: bold;
+                    color: var(--primary-color);
+                }
+
+                @media (max-width: 768px) {
+                    .hero {
+                        padding-top: 6rem;
+                    }
+                    .hero h1 {
+                        font-size: 2rem;
+                    }
+                    .modal-content {
+                        margin: 10% auto;
+                        width: 95%;
+                        padding: 1.5rem;
+                    }
+                    .filters-container {
+                        flex-direction: column;
+                        align-items: stretch;
+                    }
+                    .filter-button {
+                        justify-content: center;
+                    }
+                }
+
+                /* Additional responsive tweaks */
+                @media (max-width: 480px) {
+                    .search-box {
+                        padding: 1rem;
+                        font-size: 0.9rem;
+                    }
+                    .hero h1 {
+                        font-size: 1.8rem;
+                    }
+                    .hero p {
+                        font-size: 1rem;
+                    }
+                    .route-number {
+                        font-size: 1.2rem;
+                    }
+                }
+
+                .loading-indicator {
+                    display: none;
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    z-index: 1001;
+                }
+
+                .spinner {
+                    width: 50px;
+                    height: 50px;
+                    border: 5px solid #f3f3f3;
+                    border-top: 5px solid var(--primary-color);
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                }
+
+                @keyframes spin {
+                    0% {
+                        transform: rotate(0deg);
+                    }
+                    100% {
+                        transform: rotate(360deg);
+                    }
+                }
+
+                /* Back to Top Button */
+                #backToTop {
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    padding: 0.5rem 0.8rem;
+                    font-size: 1.5rem;
+                    background-color: var(--primary-color);
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    display: none;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+                    z-index: 1001;
+                    transition: opacity 0.3s;
+                }
+            </style>
+        </head>
+        <body>
+            <!-- Navigation -->
+            <header class="navbar" role="banner">
+                <div class="navbar-content">
+                    <div class="logo">
+                        <i class="fas fa-bus" aria-hidden="true"></i>
+                        <span>Transit Routes</span>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                <!-- Hero Section -->
+                <section class="hero" role="region" aria-labelledby="heroTitle">
+                    <h1 id="heroTitle">Find Your Route</h1>
+                    <p>Explore BRTS, Bus, and Chinchi routes across the city</p>
+                </section>
+
+                <!-- Search Section -->
+                <section class="search-container" role="search">
+                    <label for="searchInput">Search Routes</label>
+                    <input
+                        type="text"
+                        class="search-box"
+                        id="searchInput"
+                        placeholder="Search routes, stops, or locations..."
+                    />
+                </section>
+
+                <!-- Filters Section -->
+                <section class="filters-container" aria-label="Route Filters">
+                    <button class="filter-button active" data-type="all">
+                        <i class="fas fa-globe" aria-hidden="true"></i> All Routes
+                    </button>
+                    <button class="filter-button" data-type="brts">
+                        <i class="fas fa-bus" aria-hidden="true"></i> BRTS
+                    </button>
+                    <button class="filter-button" data-type="people-bus">
+                        <i class="fas fa-bus-alt" aria-hidden="true"></i> People Bus
+                    </button>
+                    <button class="filter-button" data-type="local-bus">
+                        <i class="fas fa-bus" aria-hidden="true"></i> Local Bus
+                    </button>
+                    <button class="filter-button" data-type="chinchi">
+                        <i class="fas fa-car" aria-hidden="true"></i> Chinchi
+                    </button>
+                </section>
+
+                <!-- Routes Section -->
+                <section
+                    class="routes-container"
+                    id="routesContainer"
+                    aria-live="polite"
+                ></section>
+            </main>
+
+            <!-- Modal for Stops -->
+            <div class="modal" id="stopsModal" role="dialog" aria-modal="true" aria-labelledby="modalRouteNumber">
+                <div class="modal-content">
+                    <button class="close-modal" id="closeModal" aria-label="Close Modal">&times;</button>
+                    <div class="modal-header">
+                        <div id="modalRouteType"></div>
+                        <h2 id="modalRouteNumber"></h2>
+                        <p id="modalRouteDetails"></p>
+                    </div>
+                    <ul class="stop-list" id="stopList"></ul>
+                </div>
+            </div>
+
+            <!-- Back to Top Button -->
+            <button id="backToTop" aria-label="Back to top">&uarr;</button>
+                <!-- Back to Top Button -->
+    <button id="backToTop" aria-label="Back to top">&uarr;</button>
+
+    <!-- Footer Section -->
+    <footer class="footer" style="background: linear-gradient(135deg, var(--primary-color), #303f9f); color:#fff; padding:1rem; text-align:center;">
+        <p class="credits" style="margin:0; font-size:1rem;">
+            Information provided by 
+            <a href="https://cheeltech.com/" target="_blank" style="color:#fff; text-decoration:none; transition: color 0.3s;" onmouseover="this.style.color='#bbdefb'" onmouseout="this.style.color='#fff'">
+                Cheeltech
+            </a>
+            <a href="https://thinktransportation.net/" target="_blank" style="color:#fff; text-decoration:none; transition: color 0.3s;" onmouseover="this.style.color='#bbdefb'" onmouseout="this.style.color='#fff'">
+                ThinkTransportation
+            </a>
+        </p>
+        <p class="developer" style="margin:0; font-size:0.9rem;">
+            Site developed by 
+            <a href="https://smrehman.vercel.app" target="_blank" style="color:#fff; text-decoration:none; transition: color 0.3s;" onmouseover="this.style.color='#bbdefb'" onmouseout="this.style.color='#fff'">
+                Syed Minam Ur Rehman
+            </a>
+        </p>
+        <p class="copyright" style="margin-top:0.5rem; font-size:0.8rem;">
+            &copy; 2023 Transit Routes. All rights reserved.
+        </p>
+    </footer>
+
+    
+    <script>
+        // Route data
+        const routes = [
+{ type: "brts", number: "Green line BRT", details: "Abdullah chock to numaish", stops: ["Abdullah chock", "KDA Surjani", "Karimi chowrangi","4k chowrangi","2minute chowrangi","Road-2400 Aisha complex","Power house chowrangi","Road 4200 Saleem center","Up More","Nagan Chowrangi","Erum shopping center","Sakhi hasan chowrangi","Jummah bazaar(bhayani center)","5 star chowrangi","HYDERI","BOARD OFFICE","ANNU BHAI PARK","ENQUIRY OFFICE","NAZIMABAD no.1","SANITARY MARKET(GULBAHAR)","LASBELA","PATEL PARA(guru mandir)","NUMAISH"] },
+{ type: "brts", number: "Orange line BRT", details: "board office to nadra office orangi town", stops: ["BOARD OFFICE", "ABDULLAH COLLEGE", "POLICE STATION - (orangi town)","NADRA CENTER - (orangi town)"] },
+
+
+
+{ type: "people-bus", number: "R-1", details: "Route from Model colony to Dock yard ", stops: ["MODEL COLONY", "SECURITY PRESS", "MALIR HALT","WIRELESS GATE BUS STOP","CHOTA GATE","SHAH FAISAL COLONY GATE","NATA KHAN","DRIGH ROAD","PAF BASE FAISAL","KARSAZ","PAF MUSEUM","AWAMI MARKAZ","BALOCH COLONY","FINE HOUSE","LAAL KOTHI","NURSERY","FTC BUILDING","AISHA BAWANI COLLEGE","REGENT PLAZA (SIUT)","ARTS COUNCIL OF PAKISTAN, KARACHI","SHAHEEN COMPLEX","CITY RAILWAY","I.I. CHUNDRIGAR","TOWER","DOCKYARD"] },
+{ type: "people-bus", number: "R-2", details: "Route from  Power House to Indus hospital -Korangi", stops: ["POWER HOUSE CHOWRANGI","ROAD 4200 SALEEM CENTER","UP MORE","NAGAN CHOWRANGI","SHAFIQ MOR","SOHRAB GOTH","SAGHEER GATE - FB AREA","LUCKY ONE MALL","IMTIAZ MEGA STORE (GULSHAN)","GULSHAN CHOWRANGI","NIPA CHOWRANGI","ALADIN PARK","JOHAR MOR","MILLINIUM MALL","ARMY PUBLIC SCHOOL","DRIGH ROAD","SHAH FAOSAL COLONY 2","SINGER CHOWRANGI","KHADDI STOP","SECTOR 36 LANDHI","SECTOR 35 LANDHI","SECTOR 33 LANDHI","SECTOR 32 LANDHI","GULZAR COLONY","NASIR JUMP","DISTRICT COURT-KORANGI","INDUS HOSPITAL-KORANGI"] },
+{ type: "people-bus", number: "R-3", details: "Route from POWER HOUSE to NASIR JUMP", stops: ["CSD SUPER MARKET", "POWER HOUSE CHOWRANGI", "ROAD 4200-SALEEM CENTER","UP MOR","NAGAN CHOWRANGI","ERUM SHOPPING","SAKHI HASANCHOANGI","JUMMAH BAZAAR","5 STAR CHORANGI","HYDERI MARKET","KDA CHOWRANGI","BOARD OFFICE","NAZIMABAD NO 7","NAZIMABAD NO 6","NAZIMABAD PETROL PUMP","LIAQUATABAD NO 10-LALUKHET","ESSA NAGRI","HASAN SQUARE","NATIONAL STADIUM","MARITIME MUSEUM","KDA SCHEME 1","PAF MUSEUM","AWAMI MARKAZ","BALOCH COLONY","FINE HOUSE","LAAL KOTHI","NURSERY", "KALA PUL","NMC HOSPITAL","SUNSET BOULEVARD","KPT INTERCHANGE","IMTIAZ STORE KPT INTER CHANGE","BROOKES CHOWRANGI","SOORTY FACTORY","SHAAN CHOWRANGI","NASIR JUMP"] },
+{ type: "people-bus", number: "R-4", details: "Route from Power House to Keamari ", stops: ["Power House", "UP Mor", "Nagan Chowrangi", "Shafiq Mor", "Sohrab Goth", "Water Pump", "Ayesha Manzil", "Karimabad" , "Liaqautabad 10", "Laloo Khait", "Teen Hati", "Jehangir Road", "Numaish", "Mobile Market", "Urdu Bazar", "Civil Hospital", "City Court", "Light House", "Bolton Market", "Tower"," Keamari"] },
+{ type: "people-bus", number: "R-8", details: "Route from Yousuf Goth to Tower", stops: ["Yousuf Goth"," Naval Colony", "Baldia", "Sher Shah", "Gulbai", "Agra Taj Colony", "Daryabad", "Jinnah Brige", "Tower"] },
+{ type: "people-bus", number: "R-9", details: "Route from Gulshan-e-Hadeed to tower", stops: ["Gulsahan e Hadeed", "Salah Uddin Ayubi Road", "Allah Wali Chowrangi", "National Highway 5", "Steel Mill More", "Port Bin Qasim More", "Razzakabad", "Abdullah Goth", "Chowkundi More", "Fast University", "Bhains Colony More", "Manzil Pump", "Quaidabad", "Murghi Khana", "Prince Aly Boys School", "Nadra Center Malir", "Malir Session Court", "Malir 15", "Kalaboard", "Malir Halt", "Colony Gate", "Nata Khan Bridge", "Drigh Road Station", "PAF Base Faisal", "Laal Kothi", "Karsaz", "Nursery", "FTC", "Regent Plaza", "Metropole", "Fawwara Chowk", "Arts Council", "Shaheen Complex", "I.I.Chundrigar" ," Tower"] },
+{ type: "people-bus", number: "R-10", details: "Route from Numaish to Ibrahim Hyderi", stops: ["Numaish Chowrangi", "Mobile Market", "Metropole", "Frere Hall", "Teen Talwar", "Do Talwar","Abdullah Shah Ghazi", "Dolmen Mall", "Clock Tower DHA", "26 Street", "Masjid-e-Ayesha", "Rahat Park"," KPT Inter change", "Korangi Crossing"," CBM University"," Parco", "Ibrahim Hyderi"] },
+{ type: "people-bus", number: "R-11", details: "Route from Miran nakka to Shireen Jinnah University", stops: ["Miran Nakka", "Gulistan Colony", "Bihar Colony", "Agra Taj", "Daryabad", "Jinnah Brige", "Bahria Complex", "M.T.Khan Road", "PICD", "Submarine Chowk", "Bahria Complex 3", "Khadda Market", "Abdullah Shah Ghazi", "Bilawal Chowrangi", "Ziauddin Hospital", "Shireen Jinnah Colony"] },
+{ type: "people-bus", number: "R-12", details: "Route from Naddi kinara to Lucky star", stops: ["Naddi Kinara"," Khokhrapar"," Saudabad Chowrangi"," RCD Ground", "Kalaboard"," Malir 15", "Malir Mandir", "Malir Session  Court", "Murghi Khana", "Quaidabad", "Dawood Chowrangi"," Babar Market", "Landhi Road", "Nasir Jump", "Indus Hospital", "Korangi Crossing", "Qayyumabad", "Defence Mor", "National Medical Center", "Gora Qabristan", "FTC", "Jutt Land", "Lines Area"," Army Public School", "Lucky Star Saddar"] },
+{ type: "people-bus", number: "R-13", details: "Route from Hawksway to Tower", stops: ["Hawksbay", "Mauripur", "Gulbai"," Agra Taj"," Daryabad"," Jinnah Brige"," Tower" ] },
+{ type: "people-bus", number: "EV-1", details: "Route from Malir to Dolmen mall Clifton", stops: ["CMH Malir Cantt", "Tank Chowk", "Model Colony Mor", "Jinnah Ave", "Airport"," Colony Gate"," Nata Khan Bridge"," Drigh Road Station", "PAF Base Faisal", "Laal Kothi", "Karsaz", "Nursery", "FTC", "Korangi Road", "DHA Phase 1", "Masjid e Ayesha", "Clock Tower DHA", "Dolmen Mall Clifton"] },
+{ type: "people-bus", number: "EV-2", details: "Route from Bahria Town to Malir Halt", stops: ["Bahria Town", "Dumba Goth"," Toll Plaza"," Baqai University"," Malir Cantt Gate 5", "Malir Cantt Gate 6", "Tank Chowk"," Model Mor", "Jinnah Ave", "Malir Halt"] },
+{ type: "people-bus", number: "EV-3", details: "Route from Malir Cantt. checkpost 5 to numaish", stops: ["Malir Cantt Check Post 5", "Rim Jhim Tower"," Safoora Chowrangi"," Mausamiyat Chowrangi"," Kamran Chowrangi", "Darul Sehat Hospital", "Johar Chowrangi", "Johar Mor", "Millennium Mall"," Dalmia Road"," Bahria University"," National Stadium"," Aga Khan Hospital"," Liaquat National Hospital", "PIB Colony"," Jail Chowrangi", "Dawood Engineering University"," Islamia College"," People Secretariat Chowrangi", "Numaish"] },
+{ type: "people-bus", number: "EV-4", details: "Route from Bahria town to Ayesha Manzil", stops: ["Bahria Town", "Dumba Goth"," M9 Toll Plaza", "Jamali Pull"," New Sabzi Mandi"," Al Asif", "Sohrab Goth"," Water Pump"," Ayesha Manzil"] },
+{ type: "people-bus", number: "EV-5", details: "Route from DHA city to Sohrab Goth", stops: ["DHA City"," Bahria Town", "Dumba Goth", "M9 Toll Plaza", "Jamali Pull"," New Sabzi Mandi", "Al Asif", "Sohrab Goth"] },
+
+
+{ type: "local-bus", number: "11-C", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "16", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "19-D", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "20", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "4-E", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "4-H", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "4-L", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "4-Q", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "51", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "52", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "55", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "7-C", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "7-STAR", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "9C", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "A-25", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "A-3", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "ABDULLAH", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "AL-AZAD", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "AL-KHAIR", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "BILAL", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "D-1", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "D-11", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "D-17", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "D-7", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "D-8", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "DAATA", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "F-11", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "G-11", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "G-13", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "G-17", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "G-19", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "G-27", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "G-3", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "G-7", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "GULISTAN", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "ILYAS", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "IMRAN", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "KHAN", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "MARWAT", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "MASHALLAH", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "MASHRIQ", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "MASOOD", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "MUSLIM", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "N", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "N-4", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "N-5", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "NEW AFRIDI", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "R-13", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "SAFARI COACH", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "SHIRAZ", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "SL", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "SUPER HASAN ZAI", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "SUPER MUSLIM COACH", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "W-11", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "W-22", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "W-25", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "W-55", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "X-10", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "X-23", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "X-8", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+{ type: "local-bus", number: "Z-2", details: "City Route", stops: ["Stop P", "Stop Q", "Stop R"] },
+
+
+
+
+{ type: "chinchi", number: "007", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "2-J", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "4-E", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "4-X", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "555", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "786", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "7-D", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "8", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "A", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "A-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "A-18", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "AA1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "AS-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "B-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "B-3", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "B-9", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "D-13", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "D-22", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "D-3", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "DOUBLE JHANDA", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "F-12", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "FM", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "FS-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "G-2", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "G-25", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "G-7 CHINCHI", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "GM", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "J-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "JF17", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "K-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+
+{ type: "chinchi", number: "K-18", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "K-4", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "K-5", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "K-6", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "K-86", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "KARACHI KING", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "M-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "M-10", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "M-22", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "M-5", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "M-55", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "M-7", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "M-9", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "MK-081", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "N-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "N-A(BALDIA)", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "N-55", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "N-91", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "NASEEB", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "ND1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "P-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "RAZAQ", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "R-S", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "S-2", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "S-7", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "S-K", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "SULTAN", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "T-10", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "T-11", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "T-99", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "U-5", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "V-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "W-1", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+
+{ type: "chinchi", number: "W-11 CHINCHI", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "W-86", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "X-2", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "Z", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] },
+{ type: "chinchi", number: "Z-4", details: "Short Distance Ride", stops: ["Stop M", "Stop N", "Stop O"] }
+
+
+];
+
+        // DOM elements
+        const routesContainer = document.getElementById("routesContainer");
+        const modal = document.getElementById("stopsModal");
+        const modalRouteNumber = document.getElementById("modalRouteNumber");
+        const modalRouteDetails = document.getElementById("modalRouteDetails");
+        const stopList = document.getElementById("stopList");
+        const closeModal = document.getElementById("closeModal");
+        const searchInput = document.getElementById("searchInput");
+        const filterButtons = document.querySelectorAll(".filter-button");
+        const backToTop = document.getElementById("backToTop");
+
+        // Display routes based on filter and search query
+        function displayRoutes(filter = "all", searchQuery = "") {
+            routesContainer.innerHTML = "";
+            routes.forEach((route) => {
+                if (filter !== "all" && route.type !== filter) return;
+                if (
+                    searchQuery &&
+                    !route.number.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                    return;
+
+                const routeCard = document.createElement("div");
+                routeCard.classList.add("route-card", route.type);
+                routeCard.innerHTML = `
+                    <span class="route-type ${route.type}">
+                        ${route.type.replace("-", " ").toUpperCase()}
+                    </span>
+                    <h3 class="route-number">${route.number}</h3>
+                    <p>${route.details}</p>
+                `;
+                routeCard.onclick = () => openModal(route);
+                routesContainer.appendChild(routeCard);
+            });
+        }
+
+        // Open modal and display stops for selected route
+        function openModal(route) {
+            modalRouteNumber.textContent = route.number;
+            modalRouteDetails.textContent = route.details;
+            stopList.innerHTML = "";
+            route.stops.forEach((stop, index) => {
+                const stopItem = document.createElement("li");
+                stopItem.classList.add("stop-item");
+                stopItem.innerHTML = `
+                    <span class="stop-number">${index + 1}</span>
+                    <div class="stop-info">
+                        <p class="stop-name">${stop}</p>
+                    </div>
+                `;
+                stopList.appendChild(stopItem);
+            });
+            modal.style.display = "block";
+            // Set focus for accessibility
+            modal.querySelector(".close-modal").focus();
+        }
+
+        // Close modal
+        function closeTheModal() {
+            modal.style.display = "none";
+        }
+
+        closeModal.addEventListener("click", closeTheModal);
+        window.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                closeTheModal();
+            }
+        });
+
+        // Close modal on Escape key
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && modal.style.display === "block") {
+                closeTheModal();
+            }
+        });
+
+        // Search functionality
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value;
+            const activeFilter = document.querySelector(".filter-button.active")
+                .dataset.type;
+            displayRoutes(activeFilter, query);
+        });
+
+        // Filter buttons
+        filterButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                document
+                    .querySelector(".filter-button.active")
+                    .classList.remove("active");
+                button.classList.add("active");
+                displayRoutes(button.dataset.type, searchInput.value);
+            });
+        });
+
+        // Back to Top functionality
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 300) {
+                backToTop.style.display = "block";
+            } else {
+                backToTop.style.display = "none";
+            }
+        });
+
+        backToTop.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        // Initialize routes display
+        displayRoutes();
+    </script>
+
+    </body>
+    </html>
+
+
+          
